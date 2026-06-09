@@ -1,0 +1,44 @@
+{
+  "entities": {
+    "Payment": {
+      "title": "Payment",
+      "description": "A payment submission by a user",
+      "type": "object",
+      "properties": {
+        "username": { "type": "string", "description": "Minecraft Username" },
+        "email": { "type": "string", "description": "User Email Address" },
+        "utrNumber": { "type": "string", "description": "Payment UTR or Transaction ID" },
+        "amount": { "type": "number", "description": "Payment Amount" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "items": { "type": "array", "description": "List of items purchased" },
+        "screenshotBase64": { "type": "string", "description": "Base64 encoded screenshot image" },
+        "rejectionReason": { "type": "string", "description": "Reason for rejection if applicable" },
+        "date": { "type": "timestamp", "description": "Date of transaction" },
+        "updatedAt": { "type": "timestamp", "description": "Date of last status update" }
+      },
+      "required": ["username", "email", "utrNumber", "amount", "status", "items", "screenshotBase64", "date"]
+    },
+    "AuditLog": {
+      "title": "Audit Log",
+      "description": "Log of admin actions",
+      "type": "object",
+      "properties": {
+        "action": { "type": "string" },
+        "paymentId": { "type": "string" },
+        "reason": { "type": "string" },
+        "date": { "type": "timestamp" }
+      },
+      "required": ["action", "paymentId", "date"]
+    }
+  },
+  "firestore": {
+    "payments/{paymentId}": {
+      "schema": "Payment",
+      "description": "Collection of payment submissions"
+    },
+    "auditLogs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Collection of admin actions"
+    }
+  }
+}

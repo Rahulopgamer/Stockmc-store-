@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-accent-purple: #8B5CF6;
+  --color-hover-purple: #A78BFA;
+  --color-cyber-dark: #0B0B0F;
+  --color-cyber-surface: #111118;
+  --color-cyber-card: #171721;
+  
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-float: float 6s ease-in-out infinite;
+}
+
+@layer base {
+  body {
+    background-color: #0B0B0F;
+    color: #FFFFFF;
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+  }
+}
+
+/* Custom dynamic particles / glow effects */
+.cyber-glow {
+  box-shadow: 0 0 25px rgba(139, 92, 246, 0.25);
+}
+
+.premium-border-glow {
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 35px rgba(139, 92, 246, 0.15);
+}
+
+.cyber-glass {
+  background: rgba(23, 23, 33, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cyber-glass-purple {
+  background: rgba(139, 92, 246, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+.cyber-tab-active {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.25) 0%, rgba(139, 92, 246, 0.1) 100%);
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0B0B0F;
+}
+::-webkit-scrollbar-thumb {
+  background: #171721;
+  border-radius: 99px;
+  border: 2px solid #0B0B0F;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8B5CF6;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Minecraft aesthetic text gradients */
+.text-minecraft-glow {
+  text-shadow: 0 0 12px rgba(139, 92, 246, 0.4);
+}

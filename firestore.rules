@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Payments Collection
+    // Since payments are submitted via backend (server.ts) with admin SDK,
+    // we do not need to allow client writes here.
+    // This protects against unauthorized client modifications.
+    match /payments/{paymentId} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    // Audit logs are exclusively written by backend
+    match /auditLogs/{logId} {
+      allow read, write: if false;
+    }
+  }
+}
