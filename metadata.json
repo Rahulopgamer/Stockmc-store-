@@ -1,6 +1,6 @@
 {
   "name": "StockMC Store",
-  "description": "Premium Minecraft Server Store for Lifesteal and Survival networks. Experience glassmorphism, glowing custom effects, live Minecraft search avatar integration, support systems, and a professional drawer checkout.",
+  "description": "A premium Minecraft store.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
