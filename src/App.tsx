@@ -73,8 +73,7 @@ function MainAppContent() {
             <>
               {activeView === 'home' && (
                 <>
-                  <Hero />
-                  <Leaderboard />
+                  <Hero showLeaderboard={true} />
                   <QuickCategories />
                   {/* Let home display Lifesteal storefront by default to feel alive immediately */}
                   <div className="border-t border-white/5 bg-cyber-dark/40 backdrop-blur-md mb-8 pb-4">
@@ -85,7 +84,7 @@ function MainAppContent() {
 
               {activeView === 'lifesteal' && (
                 <>
-                  <Hero />
+                  <Hero showLeaderboard={false} />
                   <div className="bg-cyber-dark/40 backdrop-blur-md pb-8">
                     <StoreFront />
                   </div>
@@ -94,7 +93,7 @@ function MainAppContent() {
 
               {activeView === 'survival' && (
                 <>
-                  <Hero />
+                  <Hero showLeaderboard={false} />
                   <div className="bg-cyber-dark/40 backdrop-blur-md pb-8">
                     <StoreFront />
                   </div>

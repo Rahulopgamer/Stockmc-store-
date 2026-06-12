@@ -5,10 +5,11 @@
 
 import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
-import { ArrowRight, Copy, Terminal, Radio, Server, Check } from 'lucide-react';
+import { ArrowRight, Copy, Server, Check } from 'lucide-react';
 import { motion } from 'motion/react';
+import Leaderboard from './Leaderboard';
 
-export default function Hero() {
+export default function Hero({ showLeaderboard }: { showLeaderboard?: boolean }) {
   const { setActiveView, addToast } = useStore();
   const [copied, setCopied] = useState(false);
   const serverIP = 'play.stockmc.fun';
@@ -109,32 +110,11 @@ export default function Hero() {
           </div>
         </motion.div>
 
-        {/* MINECRAFT SYSTEM STATUS CONSOLE */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-14 max-w-xl mx-auto rounded-xl border border-white/5 bg-cyber-card/30 p-4 backdrop-blur-sm shadow-md"
-        >
-          <div className="flex items-center gap-3">
-            <div className="p-1 bg-accent-purple/10 border border-accent-purple/20 rounded">
-              <Terminal size={14} className="text-accent-purple" />
-            </div>
-            <div className="flex-1 text-left">
-              <p className="text-[10px] font-mono text-accent-purple uppercase tracking-widest font-bold">Network Terminal</p>
-              <div className="flex items-center gap-1.5 font-mono text-xs text-gray-300">
-                <span>Core Nodes Online:</span>
-                <span className="text-emerald-400 font-bold">Lifesteal.1</span>
-                <span>&amp;</span>
-                <span className="text-emerald-400 font-bold">Survival.1</span>
-              </div>
-            </div>
-            <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono text-gray-400">
-              <Radio size={10} className="text-emerald-400 animate-pulse" />
-              <span>Ping: 12ms</span>
-            </div>
+        {showLeaderboard && (
+          <div className="mt-16">
+            <Leaderboard />
           </div>
-        </motion.div>
+        )}
 
       </div>
     </section>

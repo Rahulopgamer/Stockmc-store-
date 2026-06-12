@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 import ProductIcon from './ProductIcon';
 import { ShieldCheck, ArrowLeft, ArrowRight, Sparkles, Server, Copy, CheckCircle, Upload, Image as ImageIcon, QrCode } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import confetti from 'canvas-confetti';
 
 export default function CheckoutSection() {
   const {
@@ -83,6 +84,14 @@ export default function CheckoutSection() {
       
       setCheckoutStep('upi_verification');
       addToast('Payment proof submitted securely!', 'success');
+      
+      // Trigger confetti celebration
+      confetti({
+        particleCount: 150,
+        spread: 100,
+        origin: { y: 0.6 },
+        colors: ['#6EE7B7', '#8B5CF6', '#F59E0B'],
+      });
     } catch (err: any) {
       console.error(err);
       addToast(err.message || 'Error occurred during payment submission', 'error');

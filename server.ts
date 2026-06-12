@@ -437,6 +437,33 @@ async function startServer() {
     }
   });
 
+  // Public Leaderboard Endpoint
+  app.get("/api/leaderboard", async (req, res) => {
+    try {
+      if (!db) return res.status(503).json({ error: "API not connected to DB" });
+      
+      const snapshot = await db.collection("payments").where("status", "==", "approved").get();
+      const playerTotals: Record<string, number> = {};
+      
+      snapshot.docs.forEach(doc => {
+        const d = doc.data();
+        if (d.username && d.amount) {
+          playerTotals[d.username] = (playerTotals[d.username] || 0) + Number(d.amount);
+        }
+      });
+      
+      const sortedPlayers = Object.entries(playerTotals)
+        .map(([username, total]) => ({ username, total }))
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 10);
+        
+      res.status(200).json({ leaderboard: sortedPlayers });
+    } catch(e) {
+      console.error(e);
+      res.status(500).json({ error: "Failed to fetch leaderboard" });
+    }
+  });
+
   // Fetch Payments (For Admin Dashboard)
   app.get("/api/payments", async (req, res) => {
     try {

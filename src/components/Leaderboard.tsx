@@ -1,41 +1,46 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useStore } from '../context/StoreContext';
 import { Trophy, Crown, Flame, Star, Hexagon } from 'lucide-react';
 import { motion } from 'motion/react';
 
+interface LeaderboardEntry {
+  username: string;
+  total: number;
+}
+
 export default function Leaderboard() {
-  const { purchaseHistory, hiddenPlayers, customBadges, featuredPlayer, leaderboardResetDate } = useStore();
+  const { hiddenPlayers, customBadges, featuredPlayer, leaderboardResetDate } = useStore();
+  const [globalLeaderboard, setGlobalLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      try {
+        const res = await fetch('/api/leaderboard');
+        if (res.ok) {
+          const data = await res.json();
+          setGlobalLeaderboard(data.leaderboard || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch leaderboard", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchLeaderboard();
+  }, []);
 
   const topPlayers = useMemo(() => {
-    // 1. Filter approved purchases, not hidden, after reset date
-    const resetTime = leaderboardResetDate ? new Date(leaderboardResetDate).getTime() : 0;
-    
-    const validPurchases = purchaseHistory.filter(p => 
-      p.status === 'approved' && 
-      !hiddenPlayers.includes(p.username) &&
-      new Date(p.date).getTime() > resetTime
-    );
+    // We already have aggregated totals from the server
+    // We just need to apply local filters
+    const validPlayers = globalLeaderboard.filter(p => !hiddenPlayers.includes(p.username));
+    return validPlayers.slice(0, 10);
+  }, [globalLeaderboard, hiddenPlayers]);
 
-    // 2. Aggregate by username
-    const playerTotals: Record<string, number> = {};
-    validPurchases.forEach(p => {
-      playerTotals[p.username] = (playerTotals[p.username] || 0) + p.amount;
-    });
-
-    // 3. Sort and get top 10
-    const sortedPlayers = Object.entries(playerTotals)
-      .map(([username, total]) => ({ username, total }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 10);
-
-    // 4. If featuredPlayer is set and exists in history but not top 10, maybe we don't need to do complex logic. We just process ranks.
-    return sortedPlayers;
-  }, [purchaseHistory, hiddenPlayers, leaderboardResetDate]);
-
-  if (topPlayers.length === 0) return null;
+  if (isLoading || topPlayers.length === 0) return null;
 
   return (
-    <section className="py-16 md:py-24 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+    <div className="py-4 w-full relative">
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-accent-purple/10 blur-[120px] rounded-full pointer-events-none" />
       
@@ -165,6 +170,6 @@ export default function Leaderboard() {
           );
         })}
       </div>
-    </section>
+    </div>
   );
 }
