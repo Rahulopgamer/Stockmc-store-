@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useStore } from '../context/StoreContext';
 import { Trophy, Crown, Flame, Star, Hexagon } from 'lucide-react';
 import { motion } from 'motion/react';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../firebase';
 
 interface LeaderboardEntry {
   username: string;
@@ -16,11 +18,22 @@ export default function Leaderboard() {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const res = await fetch('/api/leaderboard');
-        if (res.ok) {
-          const data = await res.json();
-          setGlobalLeaderboard(data.leaderboard || []);
-        }
+        const snapshot = await getDocs(query(collection(db, "payments"), where("status", "==", "approved")));
+        const playerTotals: Record<string, number> = {};
+        
+        snapshot.docs.forEach(docSnap => {
+          const d = docSnap.data();
+          if (d.username && d.amount) {
+            playerTotals[d.username] = (playerTotals[d.username] || 0) + Number(d.amount);
+          }
+        });
+        
+        const sortedPlayers = Object.entries(playerTotals)
+          .map(([username, total]) => ({ username, total }))
+          .sort((a, b) => b.total - a.total)
+          .slice(0, 10);
+        
+        setGlobalLeaderboard(sortedPlayers);
       } catch (err) {
         console.error("Failed to fetch leaderboard", err);
       } finally {

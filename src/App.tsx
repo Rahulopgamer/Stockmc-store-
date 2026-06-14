@@ -17,6 +17,7 @@ import ToastContainer from './components/ToastContainer';
 import Footer from './components/Footer';
 import AdminPanel from './components/AdminPanel';
 import Leaderboard from './components/Leaderboard';
+import { motion, AnimatePresence } from 'motion/react';
 
 function MainAppContent() {
   const { activeView, checkoutStep } = useStore();
@@ -65,54 +66,72 @@ function MainAppContent() {
 
         {/* PRIMARY MAIN LAYOUT CANVAS ROUTING */}
         <main className="flex-grow">
-          {isCheckoutActive ? (
-            /* Render secure Checkout gateways directly if active */
-            <CheckoutSection />
-          ) : (
-            /* Render standard views */
-            <>
-              {activeView === 'home' && (
+          <AnimatePresence mode="wait">
+            {isCheckoutActive ? (
+              <motion.div
+                key="checkout"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+              >
+                {/* Render secure Checkout gateways directly if active */}
+                <CheckoutSection />
+              </motion.div>
+            ) : (
+              <motion.div
+                key={activeView}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+              >
+                {/* Render standard views */}
                 <>
-                  <Hero showLeaderboard={true} />
-                  <QuickCategories />
-                  {/* Let home display Lifesteal storefront by default to feel alive immediately */}
-                  <div className="border-t border-white/5 bg-cyber-dark/40 backdrop-blur-md mb-8 pb-4">
-                    <StoreFront />
-                  </div>
+                  {activeView === 'home' && (
+                    <>
+                      <Hero showLeaderboard={true} />
+                      <QuickCategories />
+                      {/* Let home display Lifesteal storefront by default to feel alive immediately */}
+                      <div className="border-t border-white/5 bg-cyber-dark/40 backdrop-blur-md mb-8 pb-4">
+                        <StoreFront />
+                      </div>
+                    </>
+                  )}
+
+                  {activeView === 'lifesteal' && (
+                    <>
+                      <Hero showLeaderboard={false} />
+                      <div className="bg-cyber-dark/40 backdrop-blur-md pb-8">
+                        <StoreFront />
+                      </div>
+                    </>
+                  )}
+
+                  {activeView === 'survival' && (
+                    <>
+                      <Hero showLeaderboard={false} />
+                      <div className="bg-cyber-dark/40 backdrop-blur-md pb-8">
+                        <StoreFront />
+                      </div>
+                    </>
+                  )}
+
+                  {activeView === 'support' && (
+                    <div className="pt-6">
+                      <SupportCenter />
+                    </div>
+                  )}
+
+                  {activeView === 'admin' && (
+                    <div className="pt-6">
+                      <AdminPanel />
+                    </div>
+                  )}
                 </>
-              )}
-
-              {activeView === 'lifesteal' && (
-                <>
-                  <Hero showLeaderboard={false} />
-                  <div className="bg-cyber-dark/40 backdrop-blur-md pb-8">
-                    <StoreFront />
-                  </div>
-                </>
-              )}
-
-              {activeView === 'survival' && (
-                <>
-                  <Hero showLeaderboard={false} />
-                  <div className="bg-cyber-dark/40 backdrop-blur-md pb-8">
-                    <StoreFront />
-                  </div>
-                </>
-              )}
-
-              {activeView === 'support' && (
-                <div className="pt-6">
-                  <SupportCenter />
-                </div>
-              )}
-
-              {activeView === 'admin' && (
-                <div className="pt-6">
-                  <AdminPanel />
-                </div>
-              )}
-            </>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </main>
 
         {/* Global footer metadata */}

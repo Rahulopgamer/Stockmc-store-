@@ -5,6 +5,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ActiveView, ProductTab, Product, CartItem, UserProfile, Coupon, PurchaseHistory } from '../types';
+import { collection, getDocs, orderBy, query, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase';
 
 interface StoreToast {
   id: string;
@@ -127,11 +129,24 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const fetchPayments = async () => {
       if (isAdminAuthenticated) {
         try {
-          const res = await fetch('/api/payments?pwd=minetrex0012030');
-          const data = await res.json();
-          if (data.payments) {
-            setPurchaseHistory(data.payments);
-          }
+          const snapshot = await getDocs(query(collection(db, "payments"), orderBy("date", "desc")));
+          const paymentsList = snapshot.docs.map(docSnap => {
+            const d = docSnap.data();
+            return {
+              id: docSnap.id,
+              username: d.username,
+              email: d.email,
+              utrNumber: d.utrNumber,
+              amount: d.amount,
+              status: d.status,
+              date: d.date?.toDate ? d.date.toDate().toISOString() : new Date().toISOString(),
+              items: d.items,
+              screenshotBase64: d.screenshotBase64,
+              rejectionReason: d.rejectionReason,
+              emailDeliveryLogs: d.emailDeliveryLogs || []
+            } as PurchaseHistory;
+          });
+          setPurchaseHistory(paymentsList);
         } catch (e) {
           console.error("Failed to fetch server payments", e);
         }
@@ -328,20 +343,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     
     // Server API call
     try {
-      const endpoint = status === 'approved' ? '/api/payments/approve' : '/api/payments/reject';
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          paymentId: id,
-          password: 'minetrex0012030', // From existing admin context logic
-          reason
-        })
-      });
+      const updateData: Record<string, any> = { status, updatedAt: serverTimestamp() };
+      if (reason) updateData.rejectionReason = reason;
 
-      if (!response.ok) {
-        throw new Error('Failed to update status on server');
-      }
+      await updateDoc(doc(db, "payments", id), updateData);
+      
+      // Emails are disabled in static mode since we have no backend!
+      
       addToast(`Purchase ${id} status securely updated to ${status}.`, 'success');
     } catch (e) {
       console.error(e);

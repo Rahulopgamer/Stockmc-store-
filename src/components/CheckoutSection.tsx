@@ -9,6 +9,8 @@ import ProductIcon from './ProductIcon';
 import { ShieldCheck, ArrowLeft, ArrowRight, Sparkles, Server, Copy, CheckCircle, Upload, Image as ImageIcon, QrCode } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase';
 
 export default function CheckoutSection() {
   const {
@@ -55,22 +57,38 @@ export default function CheckoutSection() {
     setIsSubmittingUpi(true);
     
     try {
-      const response = await fetch('/api/payments/submit', {
+      const docRef = await addDoc(collection(db, "payments"), {
+        username: mcUser?.username || 'Unknown',
+        email,
+        utrNumber,
+        amount: cartTotal,
+        items: cart.map(i => `${i.quantity}x ${i.product.name}`),
+        screenshotBase64: screenshotPreview,
+        status: "pending",
+        emailDeliveryLogs: [],
+        date: serverTimestamp()
+      });
+
+      // Send Discord Alert
+      const webhookUrl = 'https://discord.com/api/webhooks/1512417821164961852/nybOTg_gioT5iowmR-x_q7_g8eCxLRP9dhRuQ7iVC1mTJqZujuKHw0GuaJ9UfmjKIMq3';
+      fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          username: mcUser?.username || 'Unknown',
-          email,
-          utrNumber,
-          amount: cartTotal,
-          items: cart.map(i => `${i.quantity}x ${i.product.name}`),
-          screenshotBase64: screenshotPreview
-        })
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) throw new Error(data.error || 'Failed to submit payment proof');
+          username: "Sales Bot 💸",
+          embeds: [{
+            title: "🎉 New Payment Received!",
+            color: 5763719,
+            fields: [
+              { name: "Item", value: cart.map(i => `${i.quantity}x ${i.product.name}`).join(", ") },
+              { name: "Amount", value: `₹${cartTotal}`, inline: true },
+              { name: "Customer", value: mcUser?.username || 'Unknown', inline: true }
+            ],
+            footer: { text: "Website Checkout" },
+            timestamp: new Date().toISOString()
+          }]
+        }),
+      }).catch(console.error);
 
       // Still call local addPurchase to update store slightly, though we should probably fetch it.
       addPurchase({
@@ -92,9 +110,10 @@ export default function CheckoutSection() {
         origin: { y: 0.6 },
         colors: ['#6EE7B7', '#8B5CF6', '#F59E0B'],
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      addToast(err.message || 'Error occurred during payment submission', 'error');
+      const errorMessage = err instanceof Error ? err.message : 'Error occurred during payment submission';
+      addToast(errorMessage, 'error');
     } finally {
       setIsSubmittingUpi(false);
     }

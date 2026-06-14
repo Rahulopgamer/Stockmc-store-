@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Clock, CheckCircle, XCircle, Search } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../firebase';
 
 interface UserPurchase {
   id: string;
@@ -11,6 +13,7 @@ interface UserPurchase {
   date: string;
   items: string[];
   rejectionReason?: string;
+  username?: string;
 }
 
 export default function PurchaseHistoryModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
@@ -19,19 +22,36 @@ export default function PurchaseHistoryModal({ isOpen, onClose }: { isOpen: bool
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        if (!mcUser) return;
+        const snapshot = await getDocs(query(collection(db, "payments"), where("username", "==", mcUser.username)));
+        const paymentsList: UserPurchase[] = snapshot.docs.map(docSnap => {
+          const d = docSnap.data();
+          return {
+            id: docSnap.id,
+            username: d.username,
+            utrNumber: d.utrNumber,
+            amount: d.amount,
+            status: d.status,
+            date: d.date?.toDate ? d.date.toDate().toISOString() : new Date().toISOString(),
+            items: d.items,
+            rejectionReason: d.rejectionReason
+          };
+        });
+        
+        paymentsList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setPurchases(paymentsList);
+        setLoading(false);
+      } catch (e) {
+        addToast('Network error', 'error');
+        setLoading(false);
+      }
+    };
+    
     if (isOpen && mcUser) {
       setLoading(true);
-      fetch(`/api/payments/user/${encodeURIComponent(mcUser.username)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.payments) {
-            setPurchases(data.payments);
-          } else {
-            addToast('error', 'Failed to load history');
-          }
-        })
-        .catch(() => addToast('error', 'Network error'))
-        .finally(() => setLoading(false));
+      fetchHistory();
     }
   }, [isOpen, mcUser, addToast]);
 

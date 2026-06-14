@@ -117,213 +117,225 @@ export default function StoreFront() {
 
       {/* CATALOG GRID */}
       <div>
-        {filteredProducts.length === 0 ? (
-          <div className="text-center py-16 border rounded-2xl border-dashed border-white/5 bg-cyber-card/10">
-            <p className="text-gray-400 text-sm font-semibold mb-2">No products found in this category.</p>
-            <p className="text-xs text-gray-500">Check back later or explore other categories.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="products-catalog-grid">
-            
-            {/* INJECT RANKS SPECIAL SIZE GRID IF IN RANKS TAB */}
-            {activeTab === 'ranks' ? (
-              // Ranks grid wraps seamlessly responsive
-              <div className="col-span-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
-                {filteredProducts.map((p) => {
-                  const itemQty = getQuantity(p.id);
-                  const isPopular = p.isPopular;
-
-                  return (
-                    <motion.div
-                      key={p.id}
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className={`relative flex flex-col justify-between rounded-2xl bg-cyber-card border transition-all duration-300 p-5 group overflow-hidden ${
-                        isPopular
-                          ? 'premium-border-glow bg-gradient-to-tr from-accent-purple/10 to-transparent ring-1 ring-accent-purple/30'
-                          : 'border-white/5 hover:border-white/15'
-                      }`}
-                      id={`rank-card-${p.id}`}
-                    >
-                      {/* Popular ribbon top/right helper */}
-                      {isPopular && (
-                        <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded bg-accent-purple font-mono font-bold text-[9px] text-white tracking-widest uppercase">
-                          <Star size={10} fill="currentColor" />
-                          <span>Popular</span>
-                        </div>
-                      )}
-
-                      <div>
-                        {/* Rank head info */}
-                        <div className="mb-4">
-                          <ProductIcon type={p.iconType} glow={isPopular} size="sm" />
-                        </div>
-
-                        <div className="mb-4">
-                          <h3 className="font-display text-lg font-black text-white group-hover:text-accent-purple transition-colors">
-                            {p.name}
-                          </h3>
-                          <div className="flex items-baseline gap-2 mt-1">
-                            <span className="font-mono text-lg font-bold text-white">₹{p.price}</span>
-                            {p.originalPrice && (
-                              <span className="font-mono text-xs text-gray-500 line-through">₹{p.originalPrice}</span>
-                            )}
-                          </div>
-                          {p.desc && <p className="text-xs text-gray-400 mt-2 font-sans leading-relaxed">{p.desc}</p>}
-                        </div>
-
-                        {/* Feature lists */}
-                        {p.features && (
-                          <div className="border-t border-white/5 pt-4 mb-6">
-                            <div className="flex justify-between items-center mb-2">
-                              <h4 className="text-[10px] font-mono tracking-widest text-accent-purple font-bold uppercase">Unlocks features:</h4>
-                              <button
-                                onClick={(e) => { e.stopPropagation(); setSelectedRank(p); setIsRankModalOpen(true); }}
-                                className="text-[9px] px-2 py-0.5 rounded border border-accent-purple/30 bg-accent-purple/10 hover:bg-accent-purple/20 transition-colors text-white font-mono uppercase tracking-wider cursor-pointer"
-                              >
-                                Details ➜
-                              </button>
-                            </div>
-                            <ul className="space-y-2 text-left">
-                              {p.features.map((feat, fidx) => (
-                                <li key={fidx} className="flex items-start gap-2 text-[11px] text-gray-300 leading-normal">
-                                  <span className="mt-0.5 text-accent-purple">✔</span>
-                                  <span className="font-medium">{feat}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Rank actions checkout controls */}
-                      <div className="mt-auto pt-4 border-t border-white/5">
-                        {/* Quantity Counter & Add To Cart button wrapped */}
-                        <div className="flex items-center justify-between gap-3 mb-3">
-                          <span className="text-[10px] font-mono text-gray-500 font-bold uppercase">Configure qty:</span>
-                          <div id={`qty-adjuster-${p.id}`} className="flex items-center gap-1.5 bg-black/40 border border-white/5 rounded-lg px-2 py-0.5">
-                            <button
-                              id={`qty-minus-${p.id}`}
-                              onClick={() => handleAdjustQuantity(p.id, false)}
-                              className="text-gray-400 hover:text-white p-1 transition-colors cursor-pointer"
-                            >
-                              <Minus size={11} />
-                            </button>
-                            <span id={`qty-display-${p.id}`} className="font-mono text-xs font-bold text-white px-1">
-                              {itemQty}
-                            </span>
-                            <button
-                              id={`qty-plus-${p.id}`}
-                              onClick={() => handleAdjustQuantity(p.id, true)}
-                              className="text-gray-400 hover:text-white p-1 transition-colors cursor-pointer"
-                            >
-                              <Plus size={11} />
-                            </button>
-                          </div>
-                        </div>
-
-                        <button
-                          id={`add-cart-btn-${p.id}`}
-                          onClick={() => handleAddToCart(p)}
-                          className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 font-display font-bold text-xs uppercase tracking-wider rounded-xl cursor-pointer transition-all duration-300 ${
-                            isPopular
-                              ? 'bg-accent-purple hover:bg-violet-600 text-white shadow-md shadow-accent-purple/20'
-                              : 'bg-white/5 hover:bg-white/10 text-gray-200 hover:text-white border border-white/10'
-                          }`}
-                        >
-                          <ShoppingCart size={13} />
-                          <span>Add to Cart</span>
-                        </button>
-                      </div>
-                    </motion.div>
-                  );
-                })}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.2 }}
+          >
+            {filteredProducts.length === 0 ? (
+              <div className="text-center py-16 border rounded-2xl border-dashed border-white/5 bg-cyber-card/10">
+                <p className="text-gray-400 text-sm font-semibold mb-2">No products found in this category.</p>
+                <p className="text-xs text-gray-500">Check back later or explore other categories.</p>
               </div>
             ) : (
-              // Standard items grids (Keys, Coins, Tags)
-              filteredProducts.map((p) => {
-                const itemQty = getQuantity(p.id);
-                const isTagType = activeTab === 'tags';
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="products-catalog-grid">
+                
+                {/* INJECT RANKS SPECIAL SIZE GRID IF IN RANKS TAB */}
+                {activeTab === 'ranks' ? (
+                  // Ranks grid wraps seamlessly responsive
+                  <div className="col-span-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+                    {filteredProducts.map((p) => {
+                      const itemQty = getQuantity(p.id);
+                      const isPopular = p.isPopular;
 
-                return (
-                  <motion.div
-                    key={p.id}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    id={`product-card-${p.id}`}
-                    className="rounded-2xl bg-cyber-card border border-white/5 p-5 flex items-center gap-4 transition-all hover:border-white/15 hover:bg-cyber-card/85 group"
-                  >
-                    <div className="flex-shrink-0">
-                      <ProductIcon type={p.iconType} size="sm" />
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      {isTagType ? (
-                        /* Tag format styling */
-                        <div className="mb-1.5 flex items-center">
-                          <code className="text-xs px-2 py-1 font-mono font-bold rounded bg-black/40 border border-emerald-500/30 text-emerald-400 tracking-wider text-minecraft-glow">
-                            {p.name}
-                          </code>
-                        </div>
-                      ) : (
-                        <h3 className="font-display font-bold text-white truncate group-hover:text-accent-purple transition-colors">
-                          {p.name}
-                        </h3>
-                      )}
-                      
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="font-mono text-sm font-bold text-white">₹{p.price}</span>
-                        {p.originalPrice && (
-                          <span className="font-mono text-[10px] text-gray-500 line-through">₹{p.originalPrice}</span>
-                        )}
-                      </div>
-
-                      {p.desc && (
-                        <p className="text-[10px] text-gray-400 line-clamp-2 mt-1.5 font-sans leading-normal">
-                          {p.desc}
-                        </p>
-                      )}
-
-                      {/* Quantity adjusting and order interaction wrapper */}
-                      <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-white/5">
-                        {/* Qty count adjustment controls */}
-                        <div className="flex items-center gap-1.5 bg-black/40 border border-white/5 rounded-lg px-2 py-0.5">
-                          <button
-                            id={`qty-minus-${p.id}`}
-                            onClick={() => handleAdjustQuantity(p.id, false)}
-                            className="text-gray-400 hover:text-white p-1 transition-colors cursor-pointer"
-                          >
-                            <Minus size={10} />
-                          </button>
-                          <span id={`qty-display-${p.id}`} className="font-mono text-xs font-bold text-white px-1">
-                            {itemQty}
-                          </span>
-                          <button
-                            id={`qty-plus-${p.id}`}
-                            onClick={() => handleAdjustQuantity(p.id, true)}
-                            className="text-gray-400 hover:text-white p-1 transition-colors cursor-pointer"
-                          >
-                            <Plus size={10} />
-                          </button>
-                        </div>
-
-                        {/* Add action */}
-                        <button
-                          id={`add-cart-btn-${p.id}`}
-                          onClick={() => handleAddToCart(p)}
-                          className="flex items-center gap-1.5 py-1.8 px-3 rounded-xl bg-white/5 hover:bg-accent-purple hover:text-white border border-white/10 hover:border-accent-purple transition-all cursor-pointer font-mono text-[10px] font-bold uppercase tracking-wider text-gray-300"
+                      return (
+                        <motion.div
+                          key={p.id}
+                          layout
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className={`relative flex flex-col justify-between rounded-2xl bg-cyber-card border transition-all duration-300 p-5 group overflow-hidden ${
+                            isPopular
+                              ? 'premium-border-glow bg-gradient-to-tr from-accent-purple/10 to-transparent ring-1 ring-accent-purple/30'
+                              : 'border-white/5 hover:border-white/15'
+                          }`}
+                          id={`rank-card-${p.id}`}
                         >
-                          <Plus size={12} /> Add
-                        </button>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })
-            )}
+                          {/* Popular ribbon top/right helper */}
+                          {isPopular && (
+                            <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded bg-accent-purple font-mono font-bold text-[9px] text-white tracking-widest uppercase">
+                              <Star size={10} fill="currentColor" />
+                              <span>Popular</span>
+                            </div>
+                          )}
 
-          </div>
-        )}
+                          <div>
+                            {/* Rank head info */}
+                            <div className="mb-4">
+                              <ProductIcon type={p.iconType} glow={isPopular} size="sm" />
+                            </div>
+
+                            <div className="mb-4">
+                              <h3 className="font-display text-lg font-black text-white group-hover:text-accent-purple transition-colors">
+                                {p.name}
+                              </h3>
+                              <div className="flex items-baseline gap-2 mt-1">
+                                <span className="font-mono text-lg font-bold text-white">₹{p.price}</span>
+                                {p.originalPrice && (
+                                  <span className="font-mono text-xs text-gray-500 line-through">₹{p.originalPrice}</span>
+                                )}
+                              </div>
+                              {p.desc && <p className="text-xs text-gray-400 mt-2 font-sans leading-relaxed">{p.desc}</p>}
+                            </div>
+
+                            {/* Feature lists */}
+                            {p.features && (
+                              <div className="border-t border-white/5 pt-4 mb-6">
+                                <div className="flex justify-between items-center mb-2">
+                                  <h4 className="text-[10px] font-mono tracking-widest text-accent-purple font-bold uppercase">Unlocks features:</h4>
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); setSelectedRank(p); setIsRankModalOpen(true); }}
+                                    className="text-[9px] px-2 py-0.5 rounded border border-accent-purple/30 bg-accent-purple/10 hover:bg-accent-purple/20 transition-colors text-white font-mono uppercase tracking-wider cursor-pointer"
+                                  >
+                                    Details ➜
+                                  </button>
+                                </div>
+                                <ul className="space-y-2 text-left">
+                                  {p.features.map((feat, fidx) => (
+                                    <li key={fidx} className="flex items-start gap-2 text-[11px] text-gray-300 leading-normal">
+                                      <span className="mt-0.5 text-accent-purple">✔</span>
+                                      <span className="font-medium">{feat}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Rank actions checkout controls */}
+                          <div className="mt-auto pt-4 border-t border-white/5">
+                            {/* Quantity Counter & Add To Cart button wrapped */}
+                            <div className="flex items-center justify-between gap-3 mb-3">
+                              <span className="text-[10px] font-mono text-gray-500 font-bold uppercase">Configure qty:</span>
+                              <div id={`qty-adjuster-${p.id}`} className="flex items-center gap-1.5 bg-black/40 border border-white/5 rounded-lg px-2 py-0.5">
+                                <button
+                                  id={`qty-minus-${p.id}`}
+                                  onClick={() => handleAdjustQuantity(p.id, false)}
+                                  className="text-gray-400 hover:text-white p-1 transition-colors cursor-pointer"
+                                >
+                                  <Minus size={11} />
+                                </button>
+                                <span id={`qty-display-${p.id}`} className="font-mono text-xs font-bold text-white px-1">
+                                  {itemQty}
+                                </span>
+                                <button
+                                  id={`qty-plus-${p.id}`}
+                                  onClick={() => handleAdjustQuantity(p.id, true)}
+                                  className="text-gray-400 hover:text-white p-1 transition-colors cursor-pointer"
+                                >
+                                  <Plus size={11} />
+                                </button>
+                              </div>
+                            </div>
+
+                            <button
+                              id={`add-cart-btn-${p.id}`}
+                              onClick={() => handleAddToCart(p)}
+                              className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 font-display font-bold text-xs uppercase tracking-wider rounded-xl cursor-pointer transition-all duration-300 ${
+                                isPopular
+                                  ? 'bg-accent-purple hover:bg-violet-600 text-white shadow-md shadow-accent-purple/20'
+                                  : 'bg-white/5 hover:bg-white/10 text-gray-200 hover:text-white border border-white/10'
+                              }`}
+                            >
+                              <ShoppingCart size={13} />
+                              <span>Add to Cart</span>
+                            </button>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  // Standard items grids (Keys, Coins, Tags)
+                  filteredProducts.map((p) => {
+                    const itemQty = getQuantity(p.id);
+                    const isTagType = activeTab === 'tags';
+
+                    return (
+                      <motion.div
+                        key={p.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        id={`product-card-${p.id}`}
+                        className="rounded-2xl bg-cyber-card border border-white/5 p-5 flex items-center gap-4 transition-all hover:border-white/15 hover:bg-cyber-card/85 group"
+                      >
+                        <div className="flex-shrink-0">
+                          <ProductIcon type={p.iconType} size="sm" />
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          {isTagType ? (
+                            /* Tag format styling */
+                            <div className="mb-1.5 flex items-center">
+                              <code className="text-xs px-2 py-1 font-mono font-bold rounded bg-black/40 border border-emerald-500/30 text-emerald-400 tracking-wider text-minecraft-glow">
+                                {p.name}
+                              </code>
+                            </div>
+                          ) : (
+                            <h3 className="font-display font-bold text-white truncate group-hover:text-accent-purple transition-colors">
+                              {p.name}
+                            </h3>
+                          )}
+                          
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="font-mono text-sm font-bold text-white">₹{p.price}</span>
+                            {p.originalPrice && (
+                              <span className="font-mono text-[10px] text-gray-500 line-through">₹{p.originalPrice}</span>
+                            )}
+                          </div>
+
+                          {p.desc && (
+                            <p className="text-[10px] text-gray-400 line-clamp-2 mt-1.5 font-sans leading-normal">
+                              {p.desc}
+                            </p>
+                          )}
+
+                          {/* Quantity adjusting and order interaction wrapper */}
+                          <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-white/5">
+                            {/* Qty count adjustment controls */}
+                            <div className="flex items-center gap-1.5 bg-black/40 border border-white/5 rounded-lg px-2 py-0.5">
+                              <button
+                                id={`qty-minus-${p.id}`}
+                                onClick={() => handleAdjustQuantity(p.id, false)}
+                                className="text-gray-400 hover:text-white p-1 transition-colors cursor-pointer"
+                              >
+                                <Minus size={10} />
+                              </button>
+                              <span id={`qty-display-${p.id}`} className="font-mono text-xs font-bold text-white px-1">
+                                {itemQty}
+                              </span>
+                              <button
+                                id={`qty-plus-${p.id}`}
+                                onClick={() => handleAdjustQuantity(p.id, true)}
+                                className="text-gray-400 hover:text-white p-1 transition-colors cursor-pointer"
+                              >
+                                <Plus size={10} />
+                              </button>
+                            </div>
+
+                            {/* Add action */}
+                            <button
+                              id={`add-cart-btn-${p.id}`}
+                              onClick={() => handleAddToCart(p)}
+                              className="flex items-center gap-1.5 py-1.8 px-3 rounded-xl bg-white/5 hover:bg-accent-purple hover:text-white border border-white/10 hover:border-accent-purple transition-all cursor-pointer font-mono text-[10px] font-bold uppercase tracking-wider text-gray-300"
+                            >
+                              <Plus size={12} /> Add
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })
+                )}
+
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       <RankDetailsModal isOpen={isRankModalOpen} onClose={() => setIsRankModalOpen(false)} product={selectedRank} />
